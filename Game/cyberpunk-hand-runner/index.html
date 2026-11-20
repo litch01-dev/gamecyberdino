@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>CYBERPUNK HAND RUNNER | Webcam Controlled Sci-Fi Game</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+</head>
+<body>
+
+  <!-- Hidden Native Video for MediaPipe Stream Processing -->
+  <video id="webcam-video" autoplay playsinline muted style="display: none;"></video>
+
+  <div id="app-container">
+
+    <!-- ==========================================
+         SCREEN 1: MAIN MENU
+         ========================================== -->
+    <section id="screen-menu">
+      <header class="menu-header">
+        <h1 class="game-title">Cyberpunk Hand Runner</h1>
+        <p class="game-subtitle">Neural Gesture Interface</p>
+      </header>
+
+      <div class="menu-content">
+        <!-- Robot Holographic Visual Showcase -->
+        <div class="menu-robot-showcase">
+          <div class="robot-halo"></div>
+          <div class="robot-halo-inner"></div>
+          <!-- Original Cyberpunk Robot SVG Illustration -->
+          <svg class="robot-svg-preview" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Jetpack Thruster Flame -->
+            <path d="M42 95 L48 112 L54 95 Z" fill="#00E5FF" opacity="0.8" />
+            <path d="M45 95 L48 106 L51 95 Z" fill="#FFFFFF" />
+            
+            <!-- Torso & Armor -->
+            <polygon points="36,40 60,40 56,75 40,75" fill="#1E293B" stroke="#00E5FF" stroke-width="2" />
+            <!-- Glowing Core -->
+            <circle cx="48" cy="56" r="6" fill="#00E5FF" filter="drop-shadow(0 0 4px #00E5FF)" />
+            <polygon points="45,56 48,50 51,56" fill="#FFFFFF" />
+            
+            <!-- Head & Cyber Visor -->
+            <polygon points="38,20 58,20 62,34 34,34" fill="#0F172A" stroke="#475569" stroke-width="1.5" />
+            <rect x="42" y="24" width="16" height="5" rx="1" fill="#00FFFF" filter="drop-shadow(0 0 6px #00FFFF)" />
+            <!-- Antenna -->
+            <line x1="39" y1="20" x2="35" y2="10" stroke="#00E5FF" stroke-width="1.5" />
+            <circle cx="35" cy="10" r="1.5" fill="#FF0055" />
+            
+            <!-- Cyber Limbs & Joints -->
+            <rect x="26" y="42" width="7" height="20" rx="3" fill="#1E293B" stroke="#334155" />
+            <rect x="63" y="42" width="7" height="20" rx="3" fill="#1E293B" stroke="#334155" />
+            <circle cx="29" cy="42" r="3" fill="#00E5FF" />
+            <circle cx="67" cy="42" r="3" fill="#00E5FF" />
+            
+            <!-- Legs -->
+            <rect x="38" y="75" width="7" height="20" rx="3" fill="#0F172A" stroke="#00E5FF" stroke-width="1" />
+            <rect x="51" y="75" width="7" height="20" rx="3" fill="#0F172A" stroke="#00E5FF" stroke-width="1" />
+            <!-- Boots -->
+            <polygon points="34,95 47,95 45,100 34,100" fill="#334155" />
+            <polygon points="49,95 62,95 60,100 49,100" fill="#334155" />
+          </svg>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="menu-actions">
+          <button id="btn-play-now" class="cyber-button primary">
+            <span>Play Game</span>
+          </button>
+          <button id="btn-calibrate-menu" class="cyber-button">
+            <span>Calibrate Hand</span>
+          </button>
+          <button id="btn-how-to-play" class="cyber-button secondary">
+            <span>How to Play</span>
+          </button>
+          <button id="btn-settings" class="cyber-button">
+            <span>Settings</span>
+          </button>
+        </div>
+      </div>
+
+      <footer class="menu-footer">
+        <div class="high-score-badge">
+          <span class="badge-label">RECORD HIGH SCORE</span>
+          <span id="menu-high-score" class="badge-value">000000</span>
+        </div>
+        <div id="menu-camera-status" class="camera-status-pill">
+          READY FOR NEURAL LINK
+        </div>
+      </footer>
+    </section>
+
+    <!-- ==========================================
+         SCREEN 2: CALIBRATION & WEBCAM PREP
+         ========================================== -->
+    <section id="screen-calibration" class="hidden">
+      <div class="calibration-card tech-border">
+        <div class="calibration-header">
+          <h2 class="modal-title">Neural Calibration Chamber</h2>
+          <p class="tutorial-desc">Align your hand with the sensor before diving into the cyber grid.</p>
+          <div id="calibration-status-text" class="camera-status-pill" style="margin: 8px auto 0; display: inline-flex;">SEARCHING FOR CAMERA</div>
+        </div>
+
+        <div class="calibration-viewport">
+          <canvas id="calibration-canvas" width="520" height="320"></canvas>
+        </div>
+
+        <div id="calibration-feedback" class="calibration-feedback feedback-neutral">
+          Position your hand comfortably in front of the camera, then click "LOCK BASELINE".
+        </div>
+
+        <div class="calibration-controls">
+          <button id="btn-start-calibration" class="cyber-button secondary">
+            <span>Lock Baseline</span>
+          </button>
+          <button id="btn-proceed-to-game" class="cyber-button primary">
+            <span>Start Runner</span>
+          </button>
+          <button id="btn-cancel-calibration" class="cyber-button danger">
+            <span>Main Menu</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SCREEN 3: GAME CANVAS & HUD
+         ========================================== -->
+    <section id="screen-game" class="hidden">
+      <div id="canvas-wrapper">
+        <canvas id="game-canvas" width="960" height="540"></canvas>
+
+        <button id="btn-hud-pause" class="cyber-button secondary">
+          PAUSE
+        </button>
+
+        <!-- Mini PIP Webcam Feedback -->
+        <div id="mini-pip-container">
+          <span class="mini-pip-tag">HAND SENSOR</span>
+          <canvas id="mini-pip-canvas" width="160" height="110"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         MODAL: PAUSE OVERLAY
+         ========================================== -->
+    <div id="overlay-pause" class="game-overlay hidden">
+      <div class="overlay-box tech-border">
+        <h2 class="overlay-title cyan">Link Suspended</h2>
+        <p class="tutorial-desc">Neural stream temporarily frozen.</p>
+
+        <div class="overlay-actions">
+          <button id="btn-resume" class="cyber-button primary">
+            <span>Resume Run</span>
+          </button>
+          <button id="btn-restart" class="cyber-button secondary">
+            <span>Restart Run</span>
+          </button>
+          <button id="btn-pause-menu" class="cyber-button danger">
+            <span>Exit to Menu</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         MODAL: GAME OVER
+         ========================================== -->
+    <div id="overlay-game-over" class="game-overlay hidden">
+      <div class="overlay-box tech-border">
+        <h2 class="overlay-title">System Failure</h2>
+        <div id="go-new-high-badge" class="new-high-badge hidden">NEW HIGH SCORE!</div>
+
+        <div class="score-summary-grid">
+          <div class="summary-item">
+            <span class="summary-label">TOTAL SCORE</span>
+            <span id="go-final-score" class="summary-value highlight">000000</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">BEST RECORD</span>
+            <span id="go-high-score" class="summary-value">000000</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">DISTANCE</span>
+            <span id="go-distance" class="summary-value">0m</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">LEVEL REACHED</span>
+            <span id="go-level" class="summary-value">LVL 1</span>
+          </div>
+          <div class="summary-item" style="grid-column: span 2;">
+            <span class="summary-label">ITEMS ACQUIRED</span>
+            <span id="go-collectibles" class="summary-value">0</span>
+          </div>
+        </div>
+
+        <div class="overlay-actions">
+          <button id="btn-play-again" class="cyber-button primary">
+            <span>Reboot & Run</span>
+          </button>
+          <button id="btn-gameover-menu" class="cyber-button danger">
+            <span>Main Menu</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         MODAL: HOW TO PLAY
+         ========================================== -->
+    <div id="screen-how-to-play" class="modal-overlay hidden">
+      <div class="modal-card tech-border">
+        <div class="modal-header">
+          <h2 class="modal-title">Control Protocol</h2>
+          <button id="btn-close-how-to-play" class="cyber-button danger" style="padding: 6px 14px; font-size: 11px;">✕</button>
+        </div>
+
+        <div class="tutorial-grid">
+          <div class="tutorial-card">
+            <svg class="tutorial-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+            <h3 class="tutorial-step-title">1. Enable Camera</h3>
+            <p class="tutorial-desc">Grant webcam access. Computer vision runs 100% locally in your browser.</p>
+          </div>
+
+          <div class="tutorial-card">
+            <svg class="tutorial-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2v20M2 12h20M7 7l10 10M17 7L7 17"/>
+            </svg>
+            <h3 class="tutorial-step-title">2. Calibrate Rest</h3>
+            <p class="tutorial-desc">Hold your hand at a comfortable neutral resting height and lock baseline.</p>
+          </div>
+
+          <div class="tutorial-card">
+            <svg class="tutorial-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 15l-6-6-6 6"/>
+            </svg>
+            <h3 class="tutorial-step-title">3. Lift Hand to Jump</h3>
+            <p class="tutorial-desc">Raise your hand above the threshold to boost your cyber robot over hazards!</p>
+          </div>
+
+          <div class="tutorial-card">
+            <svg class="tutorial-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+              <polyline points="2 17 12 22 22 17"/>
+              <polyline points="2 12 12 17 22 12"/>
+            </svg>
+            <h3 class="tutorial-step-title">4. 5 Obstacle Types</h3>
+            <p class="tutorial-desc">Dodge Cyber Barriers, Electric Crates, Energy Gates, Lasers, and Drones.</p>
+          </div>
+
+          <div class="tutorial-card">
+            <svg class="tutorial-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="9"/>
+              <path d="M12 8v8M8 12h8"/>
+            </svg>
+            <h3 class="tutorial-step-title">5. Collect Items</h3>
+            <p class="tutorial-desc">Gather Energy Orbs (+50), Cyber Coins (+100), and Power Cores (+250).</p>
+          </div>
+
+          <div class="tutorial-card">
+            <svg class="tutorial-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <h3 class="tutorial-step-title">6. Power-Ups</h3>
+            <p class="tutorial-desc">Equip Shields (absorbs 1 hit), Magnets (draws items), and 2X Score Boosters.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         MODAL: SETTINGS
+         ========================================== -->
+    <div id="screen-settings" class="modal-overlay hidden">
+      <div class="modal-card tech-border" style="max-width: 580px;">
+        <div class="modal-header">
+          <h2 class="modal-title">System Configuration</h2>
+          <button id="btn-close-settings" class="cyber-button danger" style="padding: 6px 14px; font-size: 11px;">✕</button>
+        </div>
+
+        <div class="settings-list">
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-title">Synthesizer Music</span>
+              <span class="setting-desc">Procedural cyberpunk bass & arpeggio track</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="setting-music-toggle" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-title">Music Volume</span>
+              <span class="setting-desc">Adjust background audio intensity</span>
+            </div>
+            <div class="range-container">
+              <input type="range" id="setting-music-volume" min="0" max="100" value="60" class="cyber-range">
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-title">Sound Effects (SFX)</span>
+              <span class="setting-desc">Thrusters, jumps, collision impacts, pickups</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="setting-sfx-toggle" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-title">SFX Volume</span>
+              <span class="setting-desc">Adjust sound effects balance</span>
+            </div>
+            <div class="range-container">
+              <input type="range" id="setting-sfx-volume" min="0" max="100" value="75" class="cyber-range">
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-title">Hand Gesture Sensitivity</span>
+              <span class="setting-desc">1 (Deep lift required) to 5 (Light flick)</span>
+            </div>
+            <div class="range-container">
+              <input type="range" id="setting-sensitivity-slider" min="1" max="5" value="3" class="cyber-range">
+              <span id="setting-sensitivity-value" class="range-val">3</span>
+            </div>
+          </div>
+
+          <div class="setting-row" style="border: none; padding-top: 10px;">
+            <div class="setting-info">
+              <span class="setting-title">Reset High Score</span>
+              <span class="setting-desc">Clear local records and personal statistics</span>
+            </div>
+            <button id="btn-reset-scores" class="cyber-button danger" style="padding: 8px 18px; font-size: 11px;">
+              RESET DATA
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

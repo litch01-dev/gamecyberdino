@@ -1,0 +1,91 @@
+1. Apa tujuan pemain dan bagaimana cara mengendalikan robot?
+
+Tujuan pemain adalah mendapatkan skor tertinggi dengan menghindari rintangan. Robot berlari otomatis dan dikendalikan dengan mengangkat tangan di depan kamera untuk melompat.
+
+2. Bagaimana sistem membedakan posisi tangan normal dan gerakan mengangkat tangan?
+
+Sistem menyimpan posisi awal tangan, kemudian membandingkannya dengan posisi terbaru. Jika tangan bergerak ke atas melewati batas tertentu, robot akan melompat.
+
+3. Mengapa kalibrasi diperlukan sebelum bermain?
+
+Kalibrasi digunakan untuk menentukan posisi normal tangan pemain. Perbedaan tinggi kamera dan posisi pemain dapat memengaruhi pembacaan gerakan tangan.
+
+4. Bagaimana titik tengah telapak tangan dihitung menggunakan MediaPipe?
+
+MediaPipe mendeteksi 21 titik pada tangan. Sistem mengambil beberapa titik di sekitar telapak tangan, kemudian menghitung rata-rata koordinatnya untuk mendapatkan titik tengah.
+
+5. Apa fungsi sensitivitas gerakan tangan?
+
+Sensitivitas mengatur seberapa jauh tangan harus diangkat untuk memicu lompatan. Jika terlalu tinggi, gerakan kecil bisa terdeteksi. Jika terlalu rendah, tangan harus diangkat lebih jauh.
+
+6. Apa fungsi EMA, Movement Threshold, Debounce, dan Cooldown?
+- EMA: Menghaluskan pergerakan tangan.
+- Movement Threshold: Menentukan batas gerakan untuk melompat.
+- Debounce: Mencegah satu gerakan terbaca berkali-kali.
+- Cooldown: Memberikan jeda sebelum perintah lompat berikutnya.
+7. Mengapa tangan harus kembali ke posisi normal sebelum melompat lagi?
+
+Agar satu gerakan mengangkat tangan hanya menghasilkan satu lompatan dan tidak memicu lompatan berulang.
+
+8. Apa yang dilakukan sistem ketika tangan hilang dari kamera?
+
+Sistem menghentikan sementara pembacaan gerakan dan menampilkan status tangan tidak terdeteksi. Ketika tangan kembali terlihat, sistem memastikan posisinya stabil sebelum menerima perintah lagi.
+
+9. Bagaimana velocity dan gravitasi membuat robot melompat?
+
+Velocity memberikan dorongan ke atas, sedangkan gravitasi menarik robot kembali ke bawah hingga mendarat di permukaan.
+
+10. Mengapa robot tidak boleh melompat ketika masih di udara?
+
+Agar permainan tetap seimbang. Sistem menggunakan variabel isGrounded untuk memeriksa apakah robot sudah menyentuh tanah sebelum menerima perintah lompat.
+
+11. Apa fungsi Delta Time?
+
+Delta Time menjaga kecepatan permainan tetap konsisten meskipun FPS komputer berbeda-beda.
+
+12. Bagaimana rintangan dirancang agar bisa dihindari dengan melompat?
+
+Rintangan dibuat dengan ukuran dan jarak yang sesuai agar pemain dapat melewatinya menggunakan satu kontrol utama, yaitu melompat.
+
+13. Bagaimana sistem lima level bekerja tanpa menghentikan permainan?
+
+Setiap level meningkatkan kecepatan dan kesulitan rintangan. Setelah level 5, permainan tetap berjalan dengan tantangan yang semakin sulit.
+
+14. Apa perbedaan empat jenis skor?
+- Distance Score: Poin berdasarkan jarak tempuh.
+- Obstacle Avoidance Score: Poin karena berhasil melewati rintangan.
+- Collectible Score: Poin dari item yang dikumpulkan.
+- Total Score: Jumlah seluruh poin yang diperoleh.
+15. Apa perbedaan Shield, Magnet, dan Score Boost?
+- Shield: Melindungi robot dari satu tabrakan.
+- Magnet: Menarik item secara otomatis.
+- Score Boost: Meningkatkan poin sementara.
+Pemain dapat melihat power-up aktif melalui ikon dan indikator pada layar.
+
+16. Data apa yang disimpan menggunakan LocalStorage?
+
+Data yang disimpan antara lain high score, pengaturan suara, volume, dan sensitivitas tangan. Data tetap tersedia meskipun halaman dimuat ulang.
+
+17. Apa yang berhenti ketika game dalam kondisi PAUSED?
+
+Pergerakan robot, rintangan, animasi, skor, dan proses permainan lainnya berhenti sementara. Sistem juga memastikan game loop dan event listener tidak berjalan ganda.
+
+18. Bagaimana cara menguji seluruh fitur game?
+
+Dengan mencoba setiap fitur, seperti mengangkat tangan untuk melompat, menghindari rintangan, mengambil item, menguji level, pause, dan menyimpan skor. Pengujian deteksi tangan dan kalibrasi memerlukan webcam fisik. 
+
+Tips saat presentasi
+Ada beberapa istilah yang mungkin ditanyakan guru:
+Istilah	Arti sederhana
+MediaPipe	Library untuk mendeteksi tangan
+Landmark	Titik-titik pendeteksi bagian tangan
+Webcam	        Kamera untuk menangkap gerakan tangan
+Velocity	Kecepatan gerakan
+Gravitasi	Gaya yang menarik benda ke bawah
+Delta Time	Pengatur konsistensi kecepatan game
+LocalStorage	Penyimpanan data di browser
+Collision Detection	Sistem pendeteksi tabrakan
+
+Saran: Kalau guru bertanya bagian paling penting dari game ini, jawab:
+
+"Bagian paling penting adalah MediaPipe Hand Landmarker, karena teknologi tersebut memungkinkan kamera mendeteksi gerakan tangan dan mengubahnya menjadi perintah untuk mengendalikan karakter robot."
